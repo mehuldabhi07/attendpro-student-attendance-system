@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AttendPro - Student Attendance System</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-clipboard-user brand-icon"></i>
+            <h2>AttendPro</h2>
+        </div>
+        <ul class="nav-links">
+            <li class="active"><a href="#dashboard"><i class="fa-solid fa-chart-line"></i> <span>Dashboard</span></a></li>
+            <li><a href="#students"><i class="fa-solid fa-user-graduate"></i> <span>Student Management</span></a></li>
+            <li><a href="#classes"><i class="fa-solid fa-chalkboard-user"></i> <span>Class Management</span></a></li>
+            <li><a href="#attendance"><i class="fa-solid fa-calendar-check"></i> <span>Daily Attendance</span></a></li>
+            <li><a href="#reports"><i class="fa-solid fa-file-lines"></i> <span>Attendance Reports</span></a></li>
+            <li><a href="#history"><i class="fa-solid fa-clock-rotate-left"></i> <span>Student History</span></a></li>
+            <li><a href="#analytics"><i class="fa-solid fa-chart-pie"></i> <span>Analytics & Insights</span></a></li>
+            <li><a href="#leaves"><i class="fa-solid fa-envelope-open-text"></i> <span>Leave Management</span></a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <p><strong>Data Alcott Systems</strong></p>
+            <p>Task ID: WD-SCH-003</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Navigation Bar -->
+        <header class="top-bar">
+            <div class="toggle-menu" id="toggleSidebar">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+            <div class="user-profile">
+                <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <div class="user-info">
+                    <i class="fa-solid fa-circle-user avatar"></i>
+                    <div>
+                        <h4>Admin User</h4>
+                        <p>Data Alcott Systems</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Container for Dynamic Toast Alerts -->
+        <div id="toastContainer" class="toast-container"></div>
+
+        <!-- 1. DASHBOARD SECTION -->
+        <section id="dashboard" class="content-section active">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-chart-line"></i> Dashboard Overview</h2>
+                <p>Welcome back! Here is today's attendance summary.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card green">
+                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-data">
+                        <h3 id="statTotalStudents">0</h3>
+                        <p>Total Students</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon present"><i class="fa-solid fa-user-check"></i></div>
+                    <div class="stat-data">
+                        <h3 id="statPresentToday">0</h3>
+                        <p>Present Today</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon absent"><i class="fa-solid fa-user-xmark"></i></div>
+                    <div class="stat-data">
+                        <h3 id="statAbsentToday">0</h3>
+                        <p>Absent Today</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon leave"><i class="fa-solid fa-user-clock"></i></div>
+                    <div class="stat-data">
+                        <h3 id="statLeaveToday">0</h3>
+                        <p>On Leave / Late</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Charts & Summary -->
+            <div class="dashboard-charts">
+                <div class="card chart-card">
+                    <h3>Today's Attendance Breakdown</h3>
+                    <canvas id="todayAttendanceChart"></canvas>
+                </div>
+                <div class="card recent-activity">
+                    <h3>Quick Actions & Notifications</h3>
+                    <ul class="activity-list" id="activityList">
+                        <li><i class="fa-solid fa-circle-info text-primary"></i> System loaded with sample data successfully.</li>
+                        <li><i class="fa-solid fa-bell text-warning"></i> Remember to mark daily attendance for Class 5-A.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. STUDENT MANAGEMENT SECTION -->
+        <section id="students" class="content-section">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-user-graduate"></i> Student Management</h2>
+                <button class="btn btn-primary" id="openAddStudentModal"><i class="fa-solid fa-plus"></i> Add Student</button>
+            </div>
+
+            <div class="card">
+                <div class="filter-bar">
+                    <input type="text" id="studentSearchInput" placeholder="Search by name, roll no..." class="form-input">
+                    <select id="studentClassFilter" class="form-select">
+                        <option value="All">All Classes</option>
+                        <option value="5-A">Class 5-A</option>
+                        <option value="5-B">Class 5-B</option>
+                        <option value="6-A">Class 6-A</option>
+                    </select>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Class & Sec</th>
+                                <th>Parent Name</th>
+                                <th>Parent Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <!-- Rows loaded via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. CLASS MANAGEMENT SECTION -->
+        <section id="classes" class="content-section">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-chalkboard-user"></i> Class Management</h2>
+                <button class="btn btn-primary" id="openAddClassModal"><i class="fa-solid fa-plus"></i> Add New Class</button>
+            </div>
+
+            <div class="classes-grid" id="classListGrid">
+                <!-- Cards loaded via JavaScript -->
+            </div>
+        </section>
+
+        <!-- 4. DAILY ATTENDANCE SECTION -->
+        <section id="attendance" class="content-section">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-calendar-check"></i> Daily Attendance Marking</h2>
+            </div>
+
+            <div class="card">
+                <div class="attendance-control-bar">
+                    <div class="control-group">
+                        <label>Select Class:</label>
+                        <select id="attendanceClassSelect" class="form-select">
+                            <option value="5-A">Class 5-A</option>
+                            <option value="5-B">Class 5-B</option>
+                            <option value="6-A">Class 6-A</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Date:</label>
+                        <input type="date" id="attendanceDatePicker" class="form-input">
+                    </div>
+                    <div class="control-group actions">
+                        <button class="btn btn-secondary" id="markAllPresentBtn"><i class="fa-solid fa-check-double"></i> Mark All Present</button>
+                        <button class="btn btn-primary" id="saveAttendanceBtn"><i class="fa-solid fa-floppy-disk"></i> Save Attendance</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Student Name</th>
+                                <th>Attendance Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. ATTENDANCE REPORTS SECTION -->
+        <section id="reports" class="content-section">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-file-lines"></i> Attendance Reports</h2>
+                <button class="btn btn-secondary" id="exportCsvBtn"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+            </div>
+
+            <div class="card">
+                <div class="filter-bar">
+                    <div class="control-group">
+                        <label>Class:</label>
+                        <select id="reportClassFilter" class="form-select">
+                            <option value="All">All Classes</option>
+                            <option value="5-A">Class 5-A</option>
+                            <option value="5-B">Class 5-B</option>
+                            <option value="6-A">Class 6-A</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Date:</label>
+                        <input type="date" id="reportDatePicker" class="form-input">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table" id="reportTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. STUDENT HISTORY SECTION -->
+        <section id="history" class="content-section">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> Student Attendance History</h2>
+            </div>
+
+            <div class="card">
+                <div class="filter-bar">
+                    <label>Select Student:</label>
+                    <select id="historyStudentSelect" class="form-select">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+
+                <div id="studentHistoryDetails" class="student-history-card">
+                    <!-- History and statistics rendered dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. ANALYTICS & INSIGHTS SECTION -->
+        <section id="analytics" class="content-section">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-chart-pie"></i> Analytics & Insights</h2>
+            </div>
+
+            <div class="dashboard-charts">
+                <div class="card chart-card">
+                    <h3>Overall Attendance Trends</h3>
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <div class="card chart-card">
+                    <h3>Status Distribution</h3>
+                    <canvas id="analyticsPieChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. LEAVE MANAGEMENT SECTION -->
+        <section id="leaves" class="content-section">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-envelope-open-text"></i> Leave Management</h2>
+                <button class="btn btn-primary" id="openApplyLeaveModal"><i class="fa-solid fa-paper-plane"></i> Apply Leave</button>
+            </div>
+
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>From Date</th>
+                                <th>To Date</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaveTableBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- STUDENT MODAL -->
+    <div class="modal-overlay" id="studentModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="studentModalTitle">Add Student</h3>
+                <button class="close-btn" id="closeStudentModal">&times;</button>
+            </div>
+            <form id="studentForm">
+                <input type="hidden" id="studentId">
+                <div class="form-group">
+                    <label>Student Name</label>
+                    <input type="text" id="modalStudentName" class="form-input" required>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label>Class</label>
+                        <select id="modalStudentClass" class="form-select" required>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Section</label>
+                        <select id="modalStudentSection" class="form-select" required>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Roll Number</label>
+                    <input type="text" id="modalStudentRoll" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Parent Name</label>
+                    <input type="text" id="modalParentName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Parent Phone</label>
+                    <input type="tel" id="modalParentPhone" class="form-input" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelStudentModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- APPLY LEAVE MODAL -->
+    <div class="modal-overlay" id="leaveModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Apply for Leave</h3>
+                <button class="close-btn" id="closeLeaveModal">&times;</button>
+            </div>
+            <form id="leaveForm">
+                <div class="form-group">
+                    <label>Select Student</label>
+                    <select id="modalLeaveStudentSelect" class="form-select" required></select>
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label>From Date</label>
+                        <input type="date" id="modalLeaveFromDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>To Date</label>
+                        <input type="date" id="modalLeaveToDate" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea id="modalLeaveReason" class="form-input" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelLeaveModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>
